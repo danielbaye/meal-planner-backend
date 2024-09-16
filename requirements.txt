@@ -8,4 +8,8 @@ pytz
 sqlparse
 python-dotenv
 psycopg
-mysqlclient
+beautifulsoup4
+requests
+bs4
+
+

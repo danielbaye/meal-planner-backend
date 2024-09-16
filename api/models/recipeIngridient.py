@@ -1,12 +1,29 @@
 from django.db import models
 
-from api.models.recipe import Recipe
+from .ingridient import Ingredient
+from .recipe import Recipe
 
 
 class RecipeIngredient(models.Model):
-    recipe = models.ForeignKey(Recipe, related_name='ingredients', on_delete=models.CASCADE)  # One-to-Many relationship with Recipe
-    name = models.CharField(max_length=255)
-    quantity = models.CharField(max_length=100)  # Example: "2 cups", "1 tsp"
+
+    GRAM = 'g'
+    MILILITER = "ml"
+    SINGLE = ""
+    MEASUREMENT_CHOICES = [
+        (GRAM, 'g'),
+        (MILILITER, 'ml'),
+        (SINGLE, ''),
+    ]
+    recipe = models.ForeignKey(
+        Recipe, related_name='recipe_ingredients',
+        on_delete=models.CASCADE)  # One-to-many with Recipe
+    ingredient = models.ForeignKey(Ingredient,
+                                   related_name='recipe_ingredients',
+                                   on_delete=models.CASCADE,
+                                   null=True)  # Many-to-one with Ingredient
+    quantity = models.FloatField()  #always in grams
+    measurement = models.CharField(max_length=20, default='')
+    text = models.TextField(max_length=100, default='')
 
     def __str__(self):
-        return f"{self.quantity} of {self.name}"
+        return f"{self.quantity} {self.measurement} of {self.ingredient.name}"

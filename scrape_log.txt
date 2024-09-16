@@ -1,0 +1,31 @@
+parseIngridient name: :optional serving method (served 6)
+parseIngridient name: :
+parseIngridient name: :
+parseIngridient name: :
+parseIngridient name: :
+parseIngridient name: :basic bruschette
+parseIngridient name: :
+parseIngridient name: :
+parseIngridient name: :
+parseIngridient name: :
+getNutrioton:{'Calories': 274.0, 'Fat': 10.0, 'Saturates': 5.0, 'Sugars': 22.4, 'Protein': 7.2, 'Carbs': 37.6}
+parseIngridient name: :
+parseIngridient name: :
+parseIngridient name: :
+save_recipe:duplicate key value violates unique constraint "unique_recipe_title_source"
+DETAIL:  Key (title, source)=(Barbecued chicken, jamie) already exists.
+
+parseIngridient name: :
+parseIngridient name: :
+parseIngridient name: :
+parseIngridient name: :
+parseIngridient name: :marinade
+getNutrioton:{'Calories': 672.0, 'Fat': 23.8, 'Saturates': 5.3, 'Sugars': 3.7, 'Protein': 38.3, 'Carbs': 75.0}
+parseIngridient name: :
+parseIngridient name: :marinade
+parseIngridient name: :
+parseIngridient name: :
+parseIngridient name: :to serve
+parseIngridient name: :
+parseIngridient name: :
+parseIngridient name: :
