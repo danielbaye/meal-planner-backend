@@ -33,4 +33,4 @@ class Recipe(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.title}, skill level:{self.skillLevel}, dishNumber: {self.dishNumber}, preperatation minutes: {self.preparationMinutes}, nutrition: {self.nutrition}, tags: {self.tags}"
+        return f"{self.title}, skill level:{self.skill_level}, dishNumber: {self.dishNumber}, preperatation minutes: {self.preparationMinutes}, nutrition: {self.nutrition}, tags: {self.tags}"
