@@ -2,14 +2,18 @@ from django.shortcuts import render
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 
-from .services.recipe import getRecipes, scrape_all_recipes, scrape_and_save_recipe
+from scraper.Scraper.ingridient_scraper import parseIngridient
+
+from .services.recipe import add_approximate_cost_to_recipe, getRecipes, scrape_all_recipes, scrape_and_save_recipe
 from rest_framework import generics
 from django.http import JsonResponse
 from api.models.note import Note
 from api.models.recipeIngridient import RecipeIngredient
 from api.models.recipe import Recipe
+from api.models.ingridient import Ingredient
+from django.contrib.postgres.search import TrigramSimilarity
 
-from .serializers import NoteSerializer, RecipeSerializer, SimplifiedRecipeSerializer, UserSerianizer
+from .serializers import NoteSerializer, RecipeSerializer, RecipeSuggestionSerializer, SimplifiedRecipeSerializer, UserSerianizer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.views import View
 
@@ -43,6 +47,18 @@ class NoteDelete(generics.DestroyAPIView):
     def get_queryset(self):
         user = self.request.user
         return Note.objects.filter(author=user)
+
+
+class GetRecipeSuggestions(generics.ListAPIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, *args, **kwargs):
+        searchString = request.GET.get('searchString')
+        num_to_load = int(request.GET.get('num_to_load', 5))
+        recipeSuggestions = Recipe.get_similar_recipes(searchString,
+                                                       num_to_load)
+        serializer = RecipeSuggestionSerializer(recipeSuggestions, many=True)
+        return JsonResponse(serializer.data, safe=False)
 
 
 class GetRecipes(generics.ListAPIView):
@@ -106,3 +122,26 @@ class RecipeScrapeView(View):
 
     serializer_class = RecipeSerializer  # Specify the serializer class
     permission_classes = [AllowAny]
+
+
+class IngridientScrapeView(View):
+    permission_classes = [AllowAny]
+
+    def get(self, request, *args, **kwargs):
+        name = kwargs.get('name')
+        if name == 'cost':
+            add_approximate_cost_to_recipe()
+        elif name != 'all':
+            ingridient = Ingredient.objects.filter(name=name).first()
+            if not ingridient:
+                return JsonResponse({'error': "no such ingridient"},
+                                    safe=False)
+            return JsonResponse(parseIngridient(ingridient), safe=False)
+        else:
+            ingridients = Ingredient.objects.filter(heb_name=None)
+            updatedIngridients = []
+            for ingridient in ingridients:
+                was_parsed = parseIngridient(ingridient)
+                if was_parsed:
+                    updatedIngridients.append(ingridient.name)
+            return JsonResponse(updatedIngridients, safe=False)

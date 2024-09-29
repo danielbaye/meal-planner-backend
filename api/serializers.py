@@ -104,3 +104,10 @@ class SimplifiedRecipeSerializer(serializers.ModelSerializer):
             'title', 'description', 'dishNumber', 'preparationMinutes',
             'skill_level', 'skillLevel', 'imageUrl', 'id'
         ]
+
+
+class RecipeSuggestionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Recipe
+        fields = ['title', 'imageUrl', 'id']

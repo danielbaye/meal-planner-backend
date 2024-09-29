@@ -25,6 +25,9 @@ class Recipe(models.Model):
     imageUrl = models.CharField(null=True)
     origUrl = models.CharField(null=True)
     source = models.CharField(max_length=50, null=True)
+    approximate_cost = models.DecimalField(max_digits=5,
+                                           decimal_places=2,
+                                           null=True)
 
     class Meta:
         constraints = [
@@ -34,3 +37,7 @@ class Recipe(models.Model):
 
     def __str__(self):
         return f"{self.title}, skill level:{self.skill_level}, dishNumber: {self.dishNumber}, preperatation minutes: {self.preparationMinutes}, nutrition: {self.nutrition}, tags: {self.tags}"
+
+    def get_similar_recipes(searchQuery: str, num_to_load: int):
+        return Recipe.objects.filter(
+            title__icontains=searchQuery)[:num_to_load]

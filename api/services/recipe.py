@@ -28,6 +28,23 @@ def scrape_and_save_recipe(url: str):
     return saved_recipe
 
 
+def add_approximate_cost_to_recipe():
+    recipes = Recipe.objects.filter(approximate_cost=None)
+    for recipe in recipes:
+        try:
+            recipe_ingredients = RecipeIngredient.objects.filter(
+                recipe__id=recipe.id)
+            recipe_cost = 0
+            for r_i in recipe_ingredients:
+                quantity = r_i.quantity / 100 if r_i.measurement == 'g' or 'ml' else r_i.quantity
+                recipe_cost += quantity * float(
+                    r_i.ingredient.cost_per_100_gr_ml)
+            recipe.approximate_cost = recipe_cost
+            recipe.save()
+        except Exception as e:
+            print(e)
+
+
 def scrape_all_recipes():
     jamieScraper = JamieScraper()
     urlList = jamieScraper.getUrlList()

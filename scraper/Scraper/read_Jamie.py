@@ -21,7 +21,8 @@ word_pattern = r'\b(?:' + '|'.join(re.escape(item)
                                    for item in foodItemList) + r')\b'
 units_pattern = r'|'.join(
     re.escape(unit) for unit in measurement_dictionary.keys())
-measurement_pattern = rf'(\d+\.?\d*|\d+/\d+|\u00BD|\u00BE|\u00BC|\u2153|\u2154|\u2155|\u2156|\u2157)\s*(?:a\s+)?({units_pattern})?'
+measurement_pattern = rf'(\d+\.?\d*|\d+/\d+|\u00BD|\u00BE|\u00BC|\u2153|\u2154|\u2155|\u2156|\u2157)\s*({units_pattern})?\b'
+# rf'(\d+\.?\d*|\d+/\d+|\u00BD|\u00BE|\u00BC|\u2153|\u2154|\u2155|\u2156|\u2157)\s*(?:a\s+)?({units_pattern})?'
 
 
 class JamieScraper(Recipe_Scraper):
@@ -148,11 +149,13 @@ class JamieScraper(Recipe_Scraper):
             appendLog('parseTag', jamieRecepie.tags)
 
     def _parse_time(self, jamieRecepie: ScrapedRecipe) -> int:
-        timeWordSet = {'min', 'minute'}
+        timeWordSet = {'min', 'minute', 'hour', 'hr'}
         time_pattern = rf'(\d+\.?\d*|\d+/\d+|\u00BD|\u00BE|\u00BC|\u2153|\u2154|\u2155|\u2156|\u2157)\s*({timeWordSet})?'
         word_match = re.findall(time_pattern, jamieRecepie.time, re.IGNORECASE)
         if word_match:
-            return int(word_match[0][0])
+            return int(word_match[0][0]) if len(
+                word_match[0]) == 1 else int(word_match[0][0]) * 60 + int(
+                    word_match[1][0])
         else:
             appendLog('parseTime', time_pattern)
         return 0
@@ -181,6 +184,7 @@ class JamieScraper(Recipe_Scraper):
                 jamieRecepie.nutrition.get('Fat', 0),
                 jamieRecepie.nutrition.get('Saturates', 0),
                 jamieRecepie.nutrition.get('Salt', 0),
+                jamieRecepie.nutrition.get('Fiberalt', 0),
             )
             return nutrition
         except Exception as e:
@@ -268,8 +272,9 @@ def getNutrition(soup) -> list[tuple]:
     nutrition = [(nutritionNames[i], nutritionNumber[i])
                  for i in range(0, len(nutritionNames))]
     nutrition = {x[0]: extractFloat(x[1]) for x in nutrition}
-    if not set(['Calories', 'Protein', 'Carbs', 'Fat', 'Saturates', 'Salt'
-                ]).issubset(nutrition.keys()):
+    if not set([
+            'Calories', 'Protein', 'Carbs', 'Fat', 'Saturates', 'Salt', 'Fiber'
+    ]).issubset(nutrition.keys()):
         appendLog('getNutrioton', nutrition)
     return nutrition
 

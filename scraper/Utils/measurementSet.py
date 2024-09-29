@@ -124,5 +124,5 @@ measurement_dictionary = {
     'nests': {
         'ratio': 1,
         'measurement': ''
-    }
+    },
 }
