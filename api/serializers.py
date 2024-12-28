@@ -53,7 +53,9 @@ class IngredientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ingredient
-        fields = ['name', 'externalId', 'imageUrl', 'nutrition']
+        fields = [
+            'name', 'externalId', 'imageUrl', 'nutrition', 'cost_per_100_gr_ml'
+        ]
 
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):

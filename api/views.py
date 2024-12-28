@@ -1,17 +1,17 @@
-from django.shortcuts import render
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 
 from scraper.Scraper.ingridient_scraper import parseIngridient
 
 from .services.recipe import add_approximate_cost_to_recipe, getRecipes, scrape_all_recipes, scrape_and_save_recipe
-from rest_framework import generics
+from rest_framework import generics, response
 from django.http import JsonResponse
 from api.models.note import Note
 from api.models.recipeIngridient import RecipeIngredient
 from api.models.recipe import Recipe
 from api.models.ingridient import Ingredient
 from django.contrib.postgres.search import TrigramSimilarity
+from rest_framework_simplejwt.tokens import AccessToken
 
 from .serializers import NoteSerializer, RecipeSerializer, RecipeSuggestionSerializer, SimplifiedRecipeSerializer, UserSerianizer
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -59,6 +59,30 @@ class GetRecipeSuggestions(generics.ListAPIView):
                                                        num_to_load)
         serializer = RecipeSuggestionSerializer(recipeSuggestions, many=True)
         return JsonResponse(serializer.data, safe=False)
+
+
+class GetUser(View):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        token = request.META.get(
+            'HTTP_AUTHORIZATION',
+            '').split(' ')[1]  # Extract token from 'Bearer <token>'
+        try:
+            # Decode the access token
+            decoded_token = AccessToken(token)
+            user_id = decoded_token['user_id']  # Extract user_id from token
+
+            # Retrieve user information
+            user = User.objects.get(id=user_id)
+            user_info = {
+                'username': user.username,
+                'email': user.email,
+                'role': 'staff' if user.is_staff else 'customer'
+            }
+            return JsonResponse(user_info)
+        except Exception as e:
+            print(e)
 
 
 class GetRecipes(generics.ListAPIView):
@@ -130,7 +154,7 @@ class IngridientScrapeView(View):
     def get(self, request, *args, **kwargs):
         name = kwargs.get('name')
         if name == 'cost':
-            add_approximate_cost_to_recipe()
+            return JsonResponse(add_approximate_cost_to_recipe())
         elif name != 'all':
             ingridient = Ingredient.objects.filter(name=name).first()
             if not ingridient:
@@ -138,7 +162,7 @@ class IngridientScrapeView(View):
                                     safe=False)
             return JsonResponse(parseIngridient(ingridient), safe=False)
         else:
-            ingridients = Ingredient.objects.filter(heb_name=None)
+            ingridients = Ingredient.objects.all()
             updatedIngridients = []
             for ingridient in ingridients:
                 was_parsed = parseIngridient(ingridient)

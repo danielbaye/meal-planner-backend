@@ -14,7 +14,7 @@ class Ingredient(models.Model):
     imageUrl = models.CharField(max_length=255, null=True)
     heb_name = models.CharField(max_length=255, null=True)
     cost_per_100_gr_ml = models.DecimalField(default=0,
-                                             max_digits=4,
+                                             max_digits=6,
                                              decimal_places=2)
 
     def __str__(self):

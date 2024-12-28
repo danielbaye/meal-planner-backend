@@ -29,7 +29,7 @@ def scrape_and_save_recipe(url: str):
 
 
 def add_approximate_cost_to_recipe():
-    recipes = Recipe.objects.filter(approximate_cost=None)
+    recipes = Recipe.objects.filter()
     for recipe in recipes:
         try:
             recipe_ingredients = RecipeIngredient.objects.filter(

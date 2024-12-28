@@ -1,10 +1,13 @@
-from django.urls import path
+from django.urls import include, path
 
-from . import views
+from api import views
 
 urlpatterns = [
+    path("user/", views.GetUser.as_view(), name="user"),
     path("recipes/", views.GetRecipes.as_view(), name="recipes-list"),
-    path("recipes/<int:id>/", views.GetRecipes.as_view(), name="recipes-list"),
+    path("recipes/<int:id>/",
+         views.GetRecipes.as_view(),
+         name="recipes-list-id"),
     path("recipes/suggestions/",
          views.GetRecipeSuggestions.as_view(),
          name="recipes-search-suggestions"),
@@ -17,5 +20,5 @@ urlpatterns = [
     path("notes/", views.NoteListCreate.as_view(), name="note-list"),
     path("notes/delete/<int:pk>",
          views.NoteDelete.as_view(),
-         name="delte-note"),
+         name="delte-note")
 ]

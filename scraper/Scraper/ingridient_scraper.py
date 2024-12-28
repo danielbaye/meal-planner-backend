@@ -14,13 +14,17 @@ def findIngridientAverageCost(ingridient_id: str) -> float:
     if ingridient_id == '0' or not check_hebrew_or_integer(ingridient_id):
         return 0
     try:
-        url = f'https://chp.co.il/חיפה/0/0/{ingridient_id}'
+        city = 'חיפה'
+        url = f'https://chp.co.il/{city}/0/0/{ingridient_id}'
         page = requests.get(url)
         soup = BeautifulSoup(page.content, "html.parser")
         td = soup.findAll("td")
         h3 = soup.findAll("h3")
         gram_pattern = re.compile(r'(\d+\.?\d*)\s*(ג|גרם)')
         text = '' if h3[1] is None else h3[1].get_text()
+        if text == 'המוצר שחיפשתם לא נמצא':
+            print(f"לא מצא את: {ingridient_id}")
+            return 0
         match = gram_pattern.search(text)
         total = 1
         if match:
@@ -70,16 +74,19 @@ def findIngridientNutrition(ingridient_name: str) -> Nutrition:
 
 def parseIngridient(ingridient: Ingredient) -> bool:
     try:
-        heb_name = ingridient.heb_name if ingridient.heb_name else findIngridientHebName(
-            ingridient.name)
-        imageUrl = ''  #findIngridientImageUrl(ingridient.name)
-        cost = 0 if len(heb_name) == 0 else findIngridientAverageCost(
-            ingridient.externalId if ingridient.externalId !=
-            '0' else heb_name)
+        # if ingridient.cost_per_100_gr_ml != 0:
+        # return False
+        # heb_name = findIngridientHebName(
+        # ingridient.name)  #ingridient.heb_name if ingridient.heb_name else
+        # imageUrl = ''  #findIngridientImageUrl(ingridient.name)
+        # ingridient.heb_name = heb_name
+        cost = 0 if len(
+            ingridient.heb_name) == 0 else findIngridientAverageCost(
+                ingridient.externalId if ingridient.externalId
+                and ingridient.externalId != '0' else ingridient.heb_name)
         #nutrition
         ingridient.cost_per_100_gr_ml = cost
-        ingridient.imageUrl = imageUrl
-        ingridient.heb_name = heb_name
+        # ingridient.imageUrl = imageUrl
         ingridient.save()
         return True
     except Exception as e:
